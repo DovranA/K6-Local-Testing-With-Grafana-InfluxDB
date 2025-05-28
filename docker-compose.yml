@@ -1,14 +1,72 @@
-version: '3.4'
+# version: "3.4"
+
+# networks:
+#   k6:
+#   grafana:
+
+# services:
+#   influxdb:
+#     image: influxdb:2.7
+#     networks:
+#       - k6
+#       - grafana
+#     ports:
+#       - "8086:8086"
+#     environment:
+#       - INFLUXDB_DB=k6
+#       - INFLUXDB_ADMIN_USER=admin
+#       - INFLUXDB_ADMIN_PASSWORD=admin_password
+
+#   grafana:
+#     image: grafana/grafana:10.0.0
+#     networks:
+#       - grafana
+#     ports:
+#       - "5030:3000"
+#     environment:
+#       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+#       - GF_AUTH_ANONYMOUS_ENABLED=true
+#       - GF_AUTH_BASIC_ENABLED=false
+#       - GF_SERVER_SERVE_FROM_SUB_PATH=true
+#     volumes:
+#       - ./dashboards:/var/lib/grafana/dashboards
+#       - ./grafana-dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
+#       - ./grafana-datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+
+#   chronograf:
+#     image: chronograf:1.10
+#     ports:
+#       - "8888:8888"
+#     environment:
+#       - INFLUXDB_URL=http://influxdb:8086
+#       - INFLUXDB_USERNAME=admin
+#       - INFLUXDB_PASSWORD=admin_password
+#       - INFLUXDB_SKIP_VERIFY=true
+#     depends_on:
+#       - influxdb
+#     networks:
+#       - k6
+
+#   k6:
+#     image: grafana/k6:0.43.1
+#     networks:
+#       - k6
+#     ports:
+#       - "6565:6565"
+#     environment:
+#       - K6_INFLUXDB_ADDR=influxdb=http://influxdb:8086/k6
+#       - K6_INFLUXDB_ORGANIZATION=tmbiz
+#       - K6_INFLUXDB_BUCKET=tmbiz
+#       - K6_INFLUXDB_TOKEN=0v8-sGMzUsOHgtPLRBypwGAHkbbh4D5pJFPTaS5bM5kc7y1SA9syqL6vzLs24ra911XpAZt0iSDgeoMykNgWWg==
+#     volumes:
+#       - ./scripts:/scripts
 
 networks:
   k6:
   grafana:
-
 services:
   influxdb:
-    image: influxdb:1.8
-#    entrypoint: /bin/sh
-#    user: root
+    image: influxdb:1.8 # Version 2.x introduces some breaking compatibility changes. K6 support for it comes via an extension
     networks:
       - k6
       - grafana
@@ -18,41 +76,23 @@ services:
       - INFLUXDB_DB=k6
 
   grafana:
-    image: grafana/grafana:8.5.21
-#    entrypoint: /bin/sh
-#    user: root
+    image: grafana/grafana:latest
     networks:
       - grafana
     ports:
-      - "3000:3000"
+      - "5030:3000"
     environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_BASIC_ENABLED=false
-      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_AUTH_BASIC_ENABLED=true
     volumes:
       - ./dashboards:/var/lib/grafana/dashboards
       - ./grafana-dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
       - ./grafana-datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
-
-  chronograf:
-    image: chronograf:1.8
-    ports:
-      - "8888:8888"
-    environment:
-      - INFLUXDB_URL=http://influxdb:8086
-      - INFLUXDB_USERNAME=root
-      - INFLUXDB_PASSWORD=root
-      - INFLUXDB_SKIP_VERIFY=true
-    depends_on:
-      - influxdb
-    networks:
-      - k6  
-
   k6:
-    image: grafana/k6
-#    entrypoint: /bin/sh
-#    user: root
+    image: grafana/k6:latest
     networks:
       - k6
     ports:

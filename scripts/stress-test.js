@@ -1,28 +1,41 @@
-import http from 'k6/http';
-import { check, sleep } from "k6";
 
-const isNumeric = (value) => /^\d+$/.test(value);
+import { sleep } from "k6";
+import { testConfig } from "./config.js";
+import { PostManagement } from "./resourceObjectModel/post-management/post-management.js";
+import { Rate } from "k6/metrics"
+import { Api } from "./resourceObjectModel/api.js";
+import { FeedManagement } from "./resourceObjectModel/feed/feed-management.js";
+export var options = testConfig.testScenario.bigTest
+var environment = testConfig.environment.dev
 
-const default_vus = 5;
 
-const target_vus_env = `${__ENV.TARGET_VUS}`;
-const target_vus = isNumeric(target_vus_env) ? Number(target_vus_env) : default_vus;
+export let errorRate = new Rate("Failed")
 
-export let options = {
-  stages: [
-      // Ramp-up from 1 to TARGET_VUS virtual users (VUs) in 5s
-      { duration: "15s", target: target_vus },
-
-      // Stay at rest on TARGET_VUS VUs for 10s
-      { duration: "20s", target: target_vus },
-
-      // Ramp-down from TARGET_VUS to 0 VUs for 5s
-      { duration: "5s", target: 0 }
-  ]
-};
+export function setup() {
+  console.log(">>>>>>>>>>>>> STARTING <<<<<<<<<<<<<<")
+}
 
 export default function () {
-  const response = http.get("https://swapi.dev/api/people/30/", {headers: {Accepts: "application/json"}});
-  check(response, { "status is 200": (r) => r.status === 200 });
-  sleep(.300);
-};
+  const vuId = __VU;
+  var api = new Api(environment.url, vuId)
+  api.login()
+  api.addInterest()
+
+  api.profile()
+  const token = api.getToken()
+  if (!token) {
+    throw new Error("feedManagement is undefined: token");
+  }
+  const userId = api.getUserId()
+  if (!userId) {
+    throw new Error("feedManagement is undefined: userId");
+  }
+  const feedManagement = new FeedManagement(environment.url, token, vuId, userId)
+  feedManagement.getAll()
+  errorRate.add(!feedManagement.getResult())
+  sleep(1)
+}
+
+export function teardown(data) {
+  console.log(">>>>>>>>>>>>> TESTING COMPLETED <<<<<<<<<<<<<<")
+}
