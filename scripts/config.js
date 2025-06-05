@@ -2,12 +2,12 @@ export const testConfig = {
   testScenario: {
     bigTest: {
       stages: [
-        { duration: '5m', target: 200 },
-        { duration: '5m', target: 400 },
-        { duration: '10m', target: 600 },
-        { duration: '10m', target: 800 },
-        { duration: '15m', target: 1000 },
-        { duration: '3m', target: 0 },
+        { duration: '2m', target: 500 },
+        { duration: '2m', target: 800 },
+        { duration: '3m', target: 1000 },
+        { duration: '3m', target: 800 },
+        { duration: '4m', target: 1200 },
+        { duration: '2m', target: 0 },
       ],
     },
     singleRun: {

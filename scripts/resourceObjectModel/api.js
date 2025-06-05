@@ -25,7 +25,7 @@ export class Api extends BaseClass {
         const token = this.result.json().token;
         this.setToken(token);
         tokens[this.vusId] = token;
-        console.log("Token received:", token);
+        // console.log("Token received:", token);
       } else {
         console.error(`Login failed with status ${this.result.status}`);
       }
@@ -46,7 +46,7 @@ export class Api extends BaseClass {
         }
       }
       this.result = http.patch(`${this.authUrl}/users/interests`, JSON.stringify(body), params);
-      console.log(this.result.json())
+      // console.log(this.result.json())
       check(this.result, {
         "profile status was 200": (r) => r.status === 200
       });

@@ -1,7 +1,6 @@
 
 import { sleep } from "k6";
 import { testConfig } from "./config.js";
-import { PostManagement } from "./resourceObjectModel/post-management/post-management.js";
 import { Rate } from "k6/metrics"
 import { Api } from "./resourceObjectModel/api.js";
 import { FeedManagement } from "./resourceObjectModel/feed/feed-management.js";
@@ -21,16 +20,16 @@ export default function () {
   api.login()
   api.addInterest()
 
-  api.profile()
+  // api.profile()
   const token = api.getToken()
   if (!token) {
     throw new Error("feedManagement is undefined: token");
   }
-  const userId = api.getUserId()
-  if (!userId) {
-    throw new Error("feedManagement is undefined: userId");
-  }
-  const feedManagement = new FeedManagement(environment.url, token, vuId, userId)
+  // const userId = api.getUserId()
+  // if (!userId) {
+  //   throw new Error("feedManagement is undefined: userId");
+  // }
+  const feedManagement = new FeedManagement(environment.url, token, vuId)
   feedManagement.getAll()
   errorRate.add(!feedManagement.getResult())
   sleep(1)
