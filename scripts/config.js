@@ -2,22 +2,33 @@ export const testConfig = {
   testScenario: {
     bigTest: {
       stages: [
-        { duration: '2m', target: 500 },
-        { duration: '2m', target: 800 },
-        { duration: '3m', target: 1000 },
-        { duration: '3m', target: 800 },
-        { duration: '4m', target: 1200 },
+        { duration: '5m', target: 500 },
+        { duration: '3m', target: 300 },
+        { duration: '10m', target: 1000 },
+        { duration: '8m', target: 800 },
+        { duration: '15m', target: 1200 },
         { duration: '2m', target: 0 },
       ],
     },
+    someTest: {
+      stages: [
+        { duration: '3m', target: 1 },
+        { duration: '3m', target: 2 },
+        { duration: '3m', target: 3 },
+        { duration: '3m', target: 4 },
+        { duration: '3m', target: 5 },
+        { duration: '3m', target: 6 },
+      ],
+    },
     singleRun: {
-      vus: 1
+      vus: 20,
+      duration: "5m"
     },
     stage20vus: {
-      maxVUs: 20,
+      // maxVUs: 20,
       stage: [
-        { duration: '1m', target: 10 },
-        { duration: '30s', target: 20 },
+        { duration: '5m', target: 10 },
+        { duration: '10s', target: 20 },
       ]
     },
     ramping20VUs: {

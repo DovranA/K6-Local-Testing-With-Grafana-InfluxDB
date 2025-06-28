@@ -1,0 +1,8 @@
+*.tar
+my_logs.txt
+posts.json
+txt_to_json.js
+posts_to_write.js
+write_engages.json
+scripts/resourceObjectModel/feed/log.txt
+extracted_logs.json

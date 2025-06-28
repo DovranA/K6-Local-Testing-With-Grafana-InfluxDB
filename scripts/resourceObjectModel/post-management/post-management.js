@@ -58,7 +58,6 @@ export class PostManagement extends BaseClass {
       "status was 201": (r) => r.status === 201,
       "success write": (r) => r.json().user_id === this.userId
     });
-    console.log(res.json())
     this.checkResponseStatus();
   }
 }

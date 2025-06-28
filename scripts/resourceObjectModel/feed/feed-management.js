@@ -8,7 +8,6 @@ export class FeedManagement extends BaseClass {
     super(endpoint, vusId);
     this.engagementUrl = this.url.concat("engagement/api/v0/user/engages");
     this.url = this.url.concat("feed/api/v0/user-posts");
-    // this.userId = userId
     this.token = token;
   }
 
@@ -18,8 +17,10 @@ export class FeedManagement extends BaseClass {
         Authorization: `Bearer ${this.token}`
       }
     };
-    this.result = http.get(`${this.url}?limit=8`, params);
+    this.result = http.get(`${this.url}?limit=10`, params);
+    // console.log(this.vusId, " ", this.result.json().length)
     // console.log(`${this.url}?limit=8`, this.result.json().length)
+
     check(this.result, {
       "status was 200": (r) => r.status === 200,
       "feed not empty": (r) => {
@@ -32,7 +33,8 @@ export class FeedManagement extends BaseClass {
     });
     this.checkResponseStatus();
     this.getPostMetrics()
-    sleep((1 * 60) / 5)
+
+    sleep((1 * 60) / 25)
     this.postPostMetrics()
   }
   getPostMetrics() {
@@ -52,11 +54,33 @@ export class FeedManagement extends BaseClass {
 
   }
   postPostMetrics() {
-    const isBookmarked = Math.random() < 0.5;
-    const isLiked = Math.random() < 0.5;
-    const percentage = Math.floor(Math.random() * 100);
 
-    const engageList = this.result.json()?.map((post) => ({ post_id: post.post_id, author_id: post.author_id, author_full_name: post.author_full_name, author_avatar_url: post.author_avatar_url, bookmarked: isBookmarked, liked: isLiked, viewed_at: new Date().toISOString(), view_percentage: percentage })) ?? [];
+    const duplicates = this.findDuplicateIds(this.result.json())
+    if (duplicates.length) {
+      console.log("🚀 ~ FeedManagement ~ postPostMetrics ~ duplicates:", duplicates)
+    }
+    const engageList = this.result.json()?.map((i, index) => {
+      const { post_id, author_id, author_full_name, author_avatar_url } = i;
+      const date = new Date();
+      const viewed_at_set = date.setMinutes(date.getMinutes() + index);
+      const viewed_at = new Date(viewed_at_set).toISOString()
+      const view_percentage = Math.floor(Math.random() * 100);
+      const bookmarked = Math.floor(Math.random() * 100) > 50
+      const liked = Math.floor(Math.random() * 100) > 50
+      const reposted = Math.floor(Math.random() * 100) > 50
+      return {
+        post_id,
+        author_id,
+        author_full_name,
+        author_avatar_url,
+        bookmarked,
+        liked,
+        viewed_at,
+        view_percentage,
+        reposted
+      };
+    }) ?? [];
+
     const params = {
       headers: {
         Authorization: `Bearer ${this.token}`,
@@ -64,11 +88,24 @@ export class FeedManagement extends BaseClass {
       }
     };
     const res2 = http.post(`${this.engagementUrl}/write`, JSON.stringify({ engages: engageList }), params);
+    // console.log({ userId: this.userId, engages: engageList })
     check(res2, {
-      "success write engagement ": (r) => r.status === 201,
+      "success write engagement ": (r) => {
+        const ok = r.status === 201
+        return ok
+      },
       // "success write": (r) => r.json().user_id === this.userId
     });
-    // console.log(res2.json())
     this.checkResponseStatus();
+  }
+  findDuplicateIds(arr) {
+    const idCount = new Map();
+    arr.forEach(item => {
+      idCount.set(item.post_id, (idCount.get(item.post_id) || 0) + 1);
+    });
+    const duplicates = Array.from(idCount.entries())
+      .filter(([_, count]) => count > 1)
+      .map(([post_id]) => post_id);
+    return duplicates;
   }
 }
