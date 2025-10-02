@@ -4,23 +4,16 @@ import { BaseClass } from "../../helper/baseClass.js";
 import { Counter } from "k6/metrics";
 export const errors = new Counter("errors");
 export class FeedManagement extends BaseClass {
-  constructor(endpoint, token, vusId) {
-    super(endpoint, vusId);
+  constructor(endpoint, token, vusId, userId) {
+    super(endpoint, vusId, token);
     this.engagementUrl = this.url.concat("engagement/api/v0/user/engages");
     this.url = this.url.concat("feed/api/v0/user-posts");
     this.token = token;
+    this.userId = userId;
   }
 
   getAll() {
-    const params = {
-      headers: {
-        Authorization: `Bearer ${this.token}`
-      }
-    };
-    this.result = http.get(`${this.url}?limit=10`, params);
-    // console.log(this.vusId, " ", this.result.json().length)
-    // console.log(`${this.url}?limit=8`, this.result.json().length)
-
+    this.result = http.get(`${this.url}?limit=10`, this.params);
     check(this.result, {
       "status was 200": (r) => r.status === 200,
       "feed not empty": (r) => {
@@ -31,10 +24,9 @@ export class FeedManagement extends BaseClass {
         return ok
       }
     });
-    this.checkResponseStatus();
+    this.checkResponseStatus(200);
     this.getPostMetrics()
-
-    sleep((1 * 60) / 25)
+    sleep(16)
     this.postPostMetrics()
   }
   getPostMetrics() {
@@ -54,10 +46,9 @@ export class FeedManagement extends BaseClass {
 
   }
   postPostMetrics() {
-
     const duplicates = this.findDuplicateIds(this.result.json())
     if (duplicates.length) {
-      console.log("🚀 ~ FeedManagement ~ postPostMetrics ~ duplicates:", duplicates)
+      console.log("🚀 ~ FeedManagement ~ postPostMetrics ~ duplicates:", duplicates, " ", this.userId)
     }
     const engageList = this.result.json()?.map((i, index) => {
       const { post_id, author_id, author_full_name, author_avatar_url } = i;
@@ -76,7 +67,7 @@ export class FeedManagement extends BaseClass {
         bookmarked,
         liked,
         viewed_at,
-        view_percentage,
+        view_percentage: view_percentage === 0 ? 5 : view_percentage,
         reposted
       };
     }) ?? [];
@@ -87,14 +78,20 @@ export class FeedManagement extends BaseClass {
         'Content-Type': 'application/json'
       }
     };
+
     const res2 = http.post(`${this.engagementUrl}/write`, JSON.stringify({ engages: engageList }), params);
-    // console.log({ userId: this.userId, engages: engageList })
+    if (res2.status !== 201) {
+      console.log(res2.json())
+    }
+
+    if (res2.json()?.detail?.[0].msg === "already viewed post") {
+      console.log(res2.json())
+    }
     check(res2, {
       "success write engagement ": (r) => {
         const ok = r.status === 201
         return ok
       },
-      // "success write": (r) => r.json().user_id === this.userId
     });
     this.checkResponseStatus();
   }

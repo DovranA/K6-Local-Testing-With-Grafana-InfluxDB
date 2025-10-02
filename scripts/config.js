@@ -12,23 +12,23 @@ export const testConfig = {
     },
     someTest: {
       stages: [
-        { duration: '3m', target: 1 },
-        { duration: '3m', target: 2 },
-        { duration: '3m', target: 3 },
-        { duration: '3m', target: 4 },
-        { duration: '3m', target: 5 },
-        { duration: '3m', target: 6 },
+        { duration: '5m', target: 500 },
+        // { duration: '3m', target: 2 },
+        // { duration: '3m', target: 3 },
+        // { duration: '3m', target: 4 },
+        // { duration: '3m', target: 5 },
+        // { duration: '3m', target: 6 },
       ],
     },
     singleRun: {
-      vus: 20,
-      duration: "5m"
+      vus: 2,
+      duration: "60m"
     },
     stage20vus: {
       // maxVUs: 20,
       stage: [
-        { duration: '5m', target: 10 },
-        { duration: '10s', target: 20 },
+        { duration: '5m', target: 20 },
+        // { duration: '10s', target: 20 },
       ]
     },
     ramping20VUs: {

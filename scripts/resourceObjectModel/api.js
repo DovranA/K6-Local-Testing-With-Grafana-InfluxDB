@@ -22,7 +22,7 @@ export class Api extends BaseClass {
         "login status was 200": (r) => r.status === 200
       });
       if (this.result.status === 200) {
-        const token = this.result.json().access_token;
+        const token = this.result.json().refresh_token;
         this.setToken(token);
         tokens[this.vusId] = token;
         // console.log("Token received:", token);
@@ -31,6 +31,21 @@ export class Api extends BaseClass {
       }
     }
     this.setToken(tokens[this.vusId]);
+  }
+  healthChecker(userId) {
+    console.log("🚀 ~ Api ~ healthChecker ~ new Date(Date.now()).toISOString(): start ", userId, " ", new Date(Date.now()).toISOString())
+    const params = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.token}`
+      }
+    };
+    const result = http.get(`https://kong.tmbiz.info/post-management/health`, params)
+    check(result, {
+      "post management health": (r) => r.status === 204
+    });
+    if (result.status === 204)
+      console.log("🚀 ~ Api ~ healthChecker ~ new Date(Date.now()).toISOString(): end ", userId, " ", new Date(Date.now()).toISOString())
   }
   addInterest() {
     if (!userIds[this.vusId]) {
@@ -52,18 +67,14 @@ export class Api extends BaseClass {
       const body = {
         "tags": tags
       }
-      this.result = http.patch(`${this.authUrl}/users/interests`, JSON.stringify(body), params);
-      // console.log("interest response: ", this.result.json())
-      check(this.result, {
-        "profile status was 200": (r) => r.status === 200
-      });
+      this.result = http.patch(`${this.authUrl.replace("public", "")}/users/interests`, JSON.stringify(body), params);
+      this.checkResponseStatus(200)
       sleep(5)
     }
   }
   generateTwoDifferentRandoms(min, max) {
 
     const num1 = Math.floor(Math.random() * (max - min + 1)) + min;
-
     let num2;
 
     do {
@@ -72,28 +83,29 @@ export class Api extends BaseClass {
 
     return [num1, num2];
   }
-  profile() {
-    if (!userIds[this.vusId]) {
-      const params = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.token}`
-        }
-      };
-      this.result = http.get(this.profileUrl, params);
-      check(this.result, {
-        "profile status was 200": (r) => r.status === 200
-      });
-      if (this.result.status === 200) {
-        const userId = this.result.json().id;
-        this.setUserId(userId);
-        userIds[this.vusId] = userId;
-        // console.log("userId received:", userId);
-      } else {
-        console.error(`Login failed with status ${this.result.status}`);
-      }
-    }
-    this.setUserId(userIds[this.vusId]);
-  }
+  // profile() {
+  //   if (!userIds[this.vusId]) {
+  //     const params = {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${this.token}`
+  //       }
+  //     };
+  //     this.result = http.get(this.profileUrl, params);
+  //     check(this.result, {
+  //       "profile status was 200": (r) => r.status === 200
+  //     });
+  //     if (this.result.status === 200) {
+  //       const userId = this.result.json().id;
+  //       userIds[this.vusId] = userId;
+  //       console.log("userId received:", userId);
+  //       // this.healthChecker(userId)
+  //       this.setUserId(userId);
+  //     } else {
+  //       console.error(`Login failed with status ${this.result.status}`);
+  //     }
+  //   }
+  //   this.setUserId(userIds[this.vusId]);
+  // }
 }
 

@@ -1,31 +1,48 @@
+import { check } from "k6";
+import { Counter } from "k6/metrics";
 
-
+export const errors = new Counter("status");
 export class BaseClass {
-  constructor(endpoint, vusId) {
+  constructor({ endpoint, vusId }) {
     this.url = endpoint.concat("/");
     this.vusId = vusId
     this.result = null;
     this.token = null;
-    this.userId = null;
-  }
-  setUserId(userId) {
-    this.userId = userId
+    this.params = null
+    this.user = null
   }
   setToken(token) {
     this.token = token;
+    this.params = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      }
+    };
   }
   getToken() {
     return this.token
   }
-  getUserId() {
-    return this.userId
+  setUser({ id }) {
+    this.user.id = id
   }
-  checkResponseStatus(expectedStatus = 200) {
+  getUser() {
+    return this.user
+  }
+  checkResponseStatus(expectedStatus = 200, location = "default") {
     if (this.result.status !== expectedStatus) {
-      console.error(`GET ${this.url} failed with HTTP code ${this.result.status} ${this.result.json()}`);
+      console.error(`GET ${this.url}  failed with HTTP code ${this.result.status} location ${location} ${this.result.json()}`);
+      errors.add(1, {
+        status: String(this.result.status),
+        location: location,
+      })
     }
+    check(this.result, {
+      [`${location} status is ${expectedStatus}`]: (r) => r.status === expectedStatus,
+    })
   }
-  getResult() {
-    return this.result;
+  toJson(params) {
+    return JSON.stringify(params)
   }
 }
