@@ -48,7 +48,7 @@ export const testConfig = {
     },
     dev: {
       // url: "http://95.85.125.16:18000"
-      url: "http://kong.tmbiz.info:8000"
+      url: "https://kong.tmbiz.info"
     }, staging: {
       url: ""
     }

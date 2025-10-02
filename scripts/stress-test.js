@@ -2,10 +2,9 @@
 import { sleep } from "k6";
 import { testConfig } from "./config.js";
 import { Rate } from "k6/metrics"
-import { Api } from "./resourceObjectModel/api.js";
-import { FeedManagement } from "./resourceObjectModel/feed/feed-management.js";
 import { Auth } from "./resourceObjectModel/auth/auth.js";
-import { Me } from "./resourceObjectModel/me/me.js";
+import { UserManagement } from "./resourceObjectModel/user-management/user-class.js";
+import { PostManagement } from "./resourceObjectModel/post-management/post-management.js";
 export var options = testConfig.testScenario.singleRun
 var environment = testConfig.environment.dev
 
@@ -19,7 +18,13 @@ export default function () {
   const vusId = __VU;
   const auth = new Auth({ endpoint: environment.url, vusId })
   auth.signin()
-  const me = new Me()
+  const token = auth.getToken()
+  const userManagement = new UserManagement({ endpoint: environment.url, vusId, token })
+  userManagement.getProfile()
+  userManagement.getUsers()
+  const postManagement = new PostManagement({ endpoint: environment.url, vusId, token })
+  postManagement.getPosts()
+  // me.getProfile()
   // var api = new Api(environment.url, vuId)
   // api.login()
   // api.addInterest()

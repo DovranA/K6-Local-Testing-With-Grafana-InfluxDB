@@ -15,7 +15,7 @@ const userList = [
 export class Auth extends BaseClass {
   constructor({ endpoint, vusId }) {
     super({ endpoint, vusId });
-    this.url = this.url.concat("/public/user-management/api/v0/signin");
+    this.url = endpoint.concat("/public/user-management/api/v0/signin");
   }
   signin() {
     if (!tokens[this.vusId]) {
