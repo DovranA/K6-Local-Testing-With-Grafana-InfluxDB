@@ -17,19 +17,18 @@ export function setup() {
 export default async function () {
   const vusId = __VU;
   const auth = new Auth({ endpoint: environment.url, vusId })
-  await auth.signinGuest()
+  auth.signinGuest()
   const token = auth.getToken()
-
-  const userManagement = new UserManagement({ endpoint: environment.url, vusId, token })
-  await userManagement.getProfile()
-  await userManagement.getUsers()
+  // const userManagement = new UserManagement({ endpoint: environment.url, vusId, token })
+  // userManagement.getProfile()
+  // userManagement.getUsers()
   // const postManagement = new PostManagement({ endpoint: environment.url, vusId, token })
   const feed = new Feed({ endpoint: environment.url, vusId, token })
   // await postManagement.getPosts()
   // await postManagement.getAudios()
   // await postManagement.getPlaylists({ placement: "vertical" })
   // await postManagement.getPlaylistPosts()
-  await feed.getFeeds()
+  feed.getFeeds()
   sleep(1)
 }
 
