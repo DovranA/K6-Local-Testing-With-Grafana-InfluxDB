@@ -10,12 +10,18 @@ export class Engagement extends BaseClass {
         if (Array.isArray(posts))
             this.posts = posts ?? []
     }
-    getPostMetric() {
+
+    async getPostMetric() {
         const body = { post_id: this.posts?.map(i => i?.id) ?? [] }
-        this.result = http.post(`${this.url}/user/engages/read`, this.toJson(body), this.params);
+        this.result = await http.asyncRequest("POST", `${this.url}/user/engages/read`, this.toJson(body), this.params);
         this.checkResponseStatus(200, "Engagement.getPostMetric");
     }
-    postPostMetric() {
+    async getTotalViews() {
+        const body = { post_id: this.posts?.map(i => i?.id) ?? [] }
+        this.result = await http.asyncRequest("POST", `${this.url}/user/engages/total-views`, this.toJson(body), this.params);
+        this.checkResponseStatus(200, "Engagement.getTotalViews");
+    }
+    async postPostMetric() {
         const body = {
             engages: this.posts?.map((i, index) => {
                 const { id: post_id1, post_id: post_id2, author_id, author_full_name, author_avatar_url } = i;
@@ -32,7 +38,7 @@ export class Engagement extends BaseClass {
                 const view_percentage = Math.floor(Math.random() * 100);
                 const bookmarked = Math.floor(Math.random() * 100) > 50
                 const liked = Math.floor(Math.random() * 100) > 50
-                const reposted = Math.floor(Math.random() * 100) > 50
+                const reposted = false
                 return {
                     post_id,
                     author_id,
@@ -46,7 +52,7 @@ export class Engagement extends BaseClass {
                 };
             }) ?? []
         }
-        this.result = http.post(`${this.url}/user/engages/write`, this.toJson(body), this.params);
+        this.result = await http.asyncRequest("POST", `${this.url}/user/engages/write`, this.toJson(body), this.params);
         this.checkResponseStatus(201, "Engagement.postPostMetric")
     }
 }

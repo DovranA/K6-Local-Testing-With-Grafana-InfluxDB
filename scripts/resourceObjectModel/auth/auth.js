@@ -15,13 +15,14 @@ const userList = [
 export class Auth extends BaseClass {
   constructor({ endpoint, vusId }) {
     super({ endpoint, vusId });
-    this.url = endpoint.concat("/public/user-management/api/v0/signin");
+    this.url = endpoint.concat("/public/user-management/api/v0");
+    this.publicUrl = this.url
   }
-  signin() {
+  async signin() {
     if (!tokens[this.vusId]) {
       const user = userList[Math.floor(Math.random() * userList.length)]
       user.device_id = uuidv4()
-      this.result = http.post(this.url, this.toJson(user), { headers: { Accept: "application/json", "Content-Type": "application/json", } })
+      this.result = await http.asyncRequest("POST", `${this.url}/signin`, this.toJson(user), { headers: { Accept: "application/json", "Content-Type": "application/json", } })
       const token = this.result.json().access_token;
       this.setToken(token);
       tokens[this.vusId] = token;
@@ -29,5 +30,51 @@ export class Auth extends BaseClass {
     }
     this.setToken(tokens[this.vusId]);
   }
+  async signinGuest() {
+    if (!tokens[this.vusId]) {
+      this.result = await http.asyncRequest("POST", `${this.url}/signin-guest`, {}, { headers: { Accept: "application/json", "Content-Type": "application/json", } })
+      const token = this.result.json().access_token;
+      this.setToken(token);
+      tokens[this.vusId] = token;
+      this.checkResponseStatus(200, "Auth.signin")
+      await this.addInterest()
+    }
+    this.setToken(tokens[this.vusId]);
+  }
+  async addInterest() {
+    if (!tokens[this.vusId]) {
+      const params = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tokens[this.vusId]}`
+        }
+      };
+      const list = ["sport", "aksesuar", "konkurs", "hojalykharytlar"]
+      const rand = this.generateTwoDifferentRandoms(0, 3)
+      const rand1 = Number(rand[0])
+      const rand2 = Number(rand[1])
+      const tags = new Set()
+      tags.add(list[rand1])
+      tags[list[rand1]] = 1
+      tags.add(list[rand2])
+      tags[list[rand2]] = 1
+      const body = {
+        "tags": tags
+      }
+      this.result = await http.asyncRequest("PATCH", `/users/interests`, this.toJson(body), params);
+      this.checkResponseStatus(200, "Auth.addInterest")
+      sleep(5)
+    }
+  }
+  generateTwoDifferentRandoms(min, max) {
 
+    const num1 = Math.floor(Math.random() * (max - min + 1)) + min;
+    let num2;
+
+    do {
+      num2 = Math.floor(Math.random() * (max - min + 1)) + min;
+    } while (num1 === num2);
+
+    return [num1, num2];
+  }
 }

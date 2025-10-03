@@ -1,4 +1,5 @@
 export const testConfig = {
+  engageSleep: 60 / 10,
   testScenario: {
     bigTest: {
       stages: [
