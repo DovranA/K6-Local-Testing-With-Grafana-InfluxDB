@@ -4,9 +4,8 @@ import { testConfig } from "./config.js";
 import { Rate } from "k6/metrics"
 import { Auth } from "./resourceObjectModel/auth/auth.js";
 import { UserManagement } from "./resourceObjectModel/user-management/user-management.js";
-import { PostManagement } from "./resourceObjectModel/post-management/post-management.js";
 import { Feed } from "./resourceObjectModel/feed/feed.js";
-export var options = testConfig.testScenario.singleRun
+export var options = testConfig.testScenario.someTest
 var environment = testConfig.environment.dev
 
 export let errorRate = new Rate("Failed")

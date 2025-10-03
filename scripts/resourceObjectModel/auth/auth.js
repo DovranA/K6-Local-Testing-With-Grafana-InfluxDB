@@ -1,6 +1,7 @@
 import http from "k6/http";
 import { BaseClass } from "../../helper/baseClass.js";
 import { uuidv4 } from "../../helper/uuid-generator.js";
+import { sleep } from "k6";
 const tokens = {};
 const userList = [
   {
@@ -17,6 +18,7 @@ export class Auth extends BaseClass {
     super({ endpoint, vusId });
     this.url = endpoint.concat("/public/user-management/api/v0");
     this.publicUrl = this.url
+    this.userManagement = endpoint.concat("/user-management/api/v0")
   }
   async signin() {
     if (!tokens[this.vusId]) {
@@ -36,35 +38,35 @@ export class Auth extends BaseClass {
       const token = this.result.json().access_token;
       this.setToken(token);
       tokens[this.vusId] = token;
-      this.checkResponseStatus(200, "Auth.signin")
+      this.checkResponseStatus(200, "Auth.signinGuest")
       await this.addInterest()
     }
     this.setToken(tokens[this.vusId]);
   }
   async addInterest() {
-    if (!tokens[this.vusId]) {
-      const params = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${tokens[this.vusId]}`
-        }
-      };
-      const list = ["sport", "aksesuar", "konkurs", "hojalykharytlar"]
-      const rand = this.generateTwoDifferentRandoms(0, 3)
-      const rand1 = Number(rand[0])
-      const rand2 = Number(rand[1])
-      const tags = new Set()
-      tags.add(list[rand1])
-      tags[list[rand1]] = 1
-      tags.add(list[rand2])
-      tags[list[rand2]] = 1
-      const body = {
-        "tags": tags
+    this.url = this.userManagement
+    const params = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${tokens[this.vusId]}`
       }
-      this.result = await http.asyncRequest("PATCH", `/users/interests`, this.toJson(body), params);
-      this.checkResponseStatus(200, "Auth.addInterest")
-      sleep(5)
+    };
+    const list = ["sport", "aksesuar", "konkurs", "hojalykharytlar"]
+    const rand = this.generateTwoDifferentRandoms(0, 3)
+    const rand1 = Number(rand[0])
+    const rand2 = Number(rand[1])
+    const tags = new Set()
+    tags.add(list[rand1])
+    tags[list[rand1]] = 1
+    tags.add(list[rand2])
+    tags[list[rand2]] = 1
+    const body = {
+      "tags": tags
     }
+    this.result = await http.asyncRequest("PATCH", `${this.userManagement}/users/interests`, this.toJson(body), params);
+    this.checkResponseStatus(200, "Auth.addInterest")
+    sleep(5)
+    this.url = this.publicUrl
   }
   generateTwoDifferentRandoms(min, max) {
 

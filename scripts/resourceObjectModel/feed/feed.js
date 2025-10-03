@@ -1,6 +1,8 @@
 import http from "k6/http";
-import { sleep } from "k6";
+import { check, sleep } from "k6";
 import { Engagement } from "../engagement/engagement.js";
+import { Counter } from "k6/metrics";
+export const errors = new Counter("feed");
 export class Feed extends Engagement {
   constructor({ endpoint, token, vusId }) {
     super({ endpoint, token, vusId });
@@ -34,10 +36,17 @@ export class Feed extends Engagement {
     this.circle++
   }
   async getFeeds() {
-    while (this.circle < 4) {
-      this.result = await http.asyncRequest("GET", `${this.url}/user-posts?limit=10`, {}, this.params)
-      this.checkResponseStatus(200, "Feed.getFeeds")
-      await this.engage()
-    }
+    this.result = await http.asyncRequest("GET", `${this.url}/user-posts?limit=1`, {}, this.params)
+    this.checkResponseStatus(200, "Feed.getFeeds")
+    check(this.result, {
+      "Feed.getFeeds.isNotEmpty": (r) => {
+        const ok = r.json().length > 0
+        if (!ok) {
+          errors.add(1)
+        }
+        return ok
+      }
+    })
+    await this.engage()
   }
 }
