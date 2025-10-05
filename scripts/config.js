@@ -13,7 +13,7 @@ export const testConfig = {
     },
     someTest: {
       stages: [
-        { duration: '5m', target: 500 },
+        { duration: '3m', target: 500 },
         // { duration: '3m', target: 2 },
         // { duration: '3m', target: 3 },
         // { duration: '3m', target: 4 },
@@ -22,8 +22,8 @@ export const testConfig = {
       ],
     },
     singleRun: {
-      vus: 2,
-      duration: "60m"
+      vus: 80,
+      duration: "1m"
     },
     stage20vus: {
       // maxVUs: 20,

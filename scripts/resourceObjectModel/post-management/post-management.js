@@ -37,32 +37,53 @@ export class PostManagement extends Engagement {
     }
     this.url = this.postManagementUrl
   }
-  async getPosts() {
+  getPosts() {
     this.result = http.request("GET", `${this.url}/posts`, {}, this.params)
     this.checkResponseStatus(200, "PostManagement.getPosts")
-    this.engage("nodes")
+    // this.engage("nodes")
   }
-  getPlaylists({ placement }) {
-    this.result = http.request("GET", `${this.url}/playlists?placement=${placement}`, {}, { headers: { ...this.params.headers, "accept-language": "tk" } })
-    this.checkResponseStatus(200, "PostManagement.getPlaylists")
-    this.playlists = this.result.json()?.playlists ?? []
-    while (this.playlists.length) {
-      this.getPlaylistPosts()
-    }
+  getPostsByUserId(user_id) {
+    this.result = http.request("GET", `${this.url}/profile/posts?user_id=${user_id}`, {}, this.params)
+    this.checkResponseStatus(200, "PostManagement.getPosts")
+    // this.engage("nodes")
   }
-  async getPlaylistsAsync({ placement }) {
-    this.result = await http.asyncRequest("GET", `${this.url}/playlists?placement=${placement}`, {}, { headers: { ...this.params.headers, "accept-language": "tk" } })
-    this.checkResponseStatus(200, "PostManagement.getPlaylistsAsync")
-    this.playlists = this.result.json()?.playlists ?? []
-    while (this.playlists.length) {
-      await this.getPlaylistPostsAsync()
-    }
+  async getPostsByUserIdAsync(user_id) {
+    this.result = await http.asyncRequest("GET", `${this.url}/profile/posts?user_id=${user_id}`, {}, this.params)
+    this.checkResponseStatus(200, "PostManagement.getPostsAsync")
+    // this.engage("nodes")
+  }
+  getTestPosts() {
+    this.result = http.request("GET", `${this.url}/test/posts`, {}, this.params)
+    this.checkResponseStatus(200, "PostManagement.getPosts")
+    // this.engage("nodes")
+  }
+  async getTestPostsAsync() {
+    this.result = await http.asyncRequest("GET", `${this.url}/test/posts?last=12`, {}, this.params)
+    this.checkResponseStatus(200, "PostManagement.getPostsAsync")
+    // this.engage("nodes")
   }
   async getPostsAsync() {
     this.result = await http.asyncRequest("GET", `${this.url}/posts`, {}, this.params)
     this.checkResponseStatus(200, "PostManagement.getPostsAsync")
     await this.engageAsync("nodes")
   }
+  getPlaylists({ placement }) {
+    this.result = http.request("GET", `${this.url}/playlists?placement=${placement}`, {}, { headers: { ...this.params.headers, "Accept-Language": "tk" } })
+    this.checkResponseStatus(200, "PostManagement.getPlaylists")
+    // this.playlists = this.result.json()?.playlists ?? []
+    // while (this.playlists.length) {
+    //   this.getPlaylistPosts()
+    // }
+  }
+  async getPlaylistsAsync({ placement }) {
+    this.result = await http.asyncRequest("GET", `${this.url}/playlists?placement=${placement}`, {}, { headers: { ...this.params.headers, "Accept-Language": "tk" } })
+    this.checkResponseStatus(200, "PostManagement.getPlaylistsAsync")
+    this.playlists = this.result.json()?.playlists ?? []
+    while (this.playlists.length) {
+      await this.getPlaylistPostsAsync()
+    }
+  }
+
   getPlaylistPosts() {
     const playlist_id = this.playlists?.at(0)?.id
     this.result = http.request("GET", `${this.url}/playlists/${playlist_id}/contents?limit=12&current_page=1`, {}, this.params)
@@ -88,11 +109,27 @@ export class PostManagement extends Engagement {
     this.checkResponseStatus(200, "PostManagement.getAudiosAsync")
   }
   getCategories() {
-    this.result = http.request(`${this.url}/categories`, {}, this.params)
+    this.result = http.request("GET", `${this.url}/categories`, {}, this.params)
     this.checkResponseStatus(200, "PostManagement.getCategories")
   }
   async getCategoriesAsync() {
-    this.result = await http.asyncRequest(`${this.url}/categories`, {}, this.params)
+    this.result = await http.asyncRequest("GET", `${this.url}/categories`, {}, this.params)
     this.checkResponseStatus(200, "PostManagement.getCategoriesAsync")
+  }
+  getGenres() {
+    this.result = http.request("GET", `${this.url}/genres`, {}, this.params)
+    this.checkResponseStatus(200, "PostManagement.getGenres")
+  }
+  async getGenresAsync() {
+    this.result = await http.asyncRequest("GET", `${this.url}/genres`, {}, this.params)
+    this.checkResponseStatus(200, "PostManagement.getGenresAsync")
+  }
+  getTags() {
+    this.result = http.request("GET", `${this.url}/tags`, {}, this.params)
+    this.checkResponseStatus(200, "PostManagement.getTags")
+  }
+  async getTagsAsync() {
+    this.result = await http.asyncRequest("GET", `${this.url}/tags`, {}, this.params)
+    this.checkResponseStatus(200, "PostManagement.getTagsAsync")
   }
 }

@@ -51,7 +51,7 @@ export class Auth extends BaseClass {
       this.setToken(token);
       tokens[this.vusId] = token;
       this.checkResponseStatus(200, "Auth.signinGuest")
-      this.addInterestAsync()
+      // this.addInterestAsync()
     }
     this.setToken(tokens[this.vusId]);
   }
